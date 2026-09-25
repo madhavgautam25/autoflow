@@ -25,4 +25,6 @@ void scheduler_print_processes(Scheduler *scheduler);
 
 void scheduler_run_fcfs(Scheduler *scheduler);
 
+void scheduler_run_sjf(Scheduler *scheduler);
+
 #endif

@@ -121,3 +121,57 @@ void scheduler_run_fcfs(Scheduler *scheduler) {
 
     }
 }
+
+void scheduler_run_sjf(Scheduler *scheduler) {
+
+    if (scheduler == NULL) {
+        return;
+    }
+
+    int completed[scheduler->process_count];
+
+    for (int i = 0; i < scheduler->process_count; i++) {
+        completed[i] = 0;
+    }
+
+    scheduler->current_time = 0;
+
+    int completed_count = 0;
+
+    while (completed_count < scheduler->process_count) {
+
+        int shortest_index = -1;
+
+        for (int i = 0; i < scheduler->process_count; i++) {
+
+            Process *process = &scheduler->processes[i];
+
+            if (completed[i] == 0 && process->arrival_time <= scheduler->current_time) {
+
+                if (shortest_index == -1 || process->burst_time < scheduler->processes[shortest_index].burst_time) {
+                    shortest_index = i;
+                }
+            }
+        }
+
+        if (shortest_index == -1) {
+            scheduler->current_time++;
+            continue;
+        }
+
+        Process *process = &scheduler->processes[shortest_index];
+
+        process->start_time = scheduler->current_time;
+
+        scheduler->current_time += process->burst_time;
+
+        process->completion_time = scheduler->current_time;
+
+        calculate_process_metrics(process);
+
+        completed[shortest_index] = 1;
+
+        completed_count++;
+
+    }
+}
