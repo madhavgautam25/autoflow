@@ -23,4 +23,6 @@ int scheduler_add_process(
 
 void scheduler_print_processes(Scheduler *scheduler);
 
+void scheduler_run_fcfs(Scheduler *scheduler);
+
 #endif

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "scheduler.h"
+#include "metrics.h"
 
 Scheduler *scheduler_create(int capacity) {
 
@@ -65,7 +66,7 @@ void scheduler_print_processes(Scheduler *scheduler) {
         return;
     }
 
-    printf("\nAutoFlow Processes\n");                                                                                                                                       
+    printf("\nAutoFlow Processes\n");
     printf("-----------------------------\n");
 
     printf("PID\tArrival\tBurst\tPriority\n");
@@ -92,4 +93,31 @@ void scheduler_destroy(Scheduler *scheduler) {
 
     free(scheduler->processes);
     free(scheduler);
+}
+
+void scheduler_run_fcfs(Scheduler *scheduler) {
+
+    if (scheduler == NULL) {
+        return;
+    }
+
+    scheduler->current_time = 0;
+
+    for (int i = 0; i < scheduler->process_count; i++) {
+
+        Process *process = &scheduler->processes[i];
+
+        if (scheduler->current_time < process->arrival_time) {
+            scheduler->current_time = process->arrival_time;
+        }
+
+        process->start_time = scheduler->current_time;
+
+        scheduler->current_time += process->burst_time;
+
+        process->completion_time = scheduler->current_time;
+
+        calculate_process_metrics(process);
+
+    }
 }
