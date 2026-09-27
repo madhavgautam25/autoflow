@@ -29,4 +29,9 @@ void scheduler_run_sjf(Scheduler *scheduler);
 
 void scheduler_run_priority(Scheduler *scheduler);
 
+void scheduler_run_round_robin(
+    Scheduler *scheduler,
+    int time_quantum
+);
+
 #endif

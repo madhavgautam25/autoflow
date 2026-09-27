@@ -27,15 +27,25 @@ int main() {
     }
 
     printf("Queue size: %d\n", queue_size(queue));
-
-    queue_destroy(queue);
+    
+    printf("Enqueue P1 again: %d\n", queue_enqueue(queue, &p1));
+    
+    printf("Queue size: %d\n", queue_size(queue));
+    
+    Process *process2 = queue_dequeue(queue);
+    
+    if (process2 != NULL) {
+        printf("Dequeued: P%d\n", process2->pid);
+    }
+    
+    printf("Enqueue P2 again: %d\n", queue_enqueue(queue, &p2));
+    
+    printf("Queue size: %d\n", queue_size(queue));
 
     printf("Is empty: %d\n", queue_is_empty(queue));
     printf("Is full: %d\n", queue_is_full(queue));
-
-    printf("Enqueue P1 again: %d\n", queue_enqueue(queue, &p1));
-
-    printf("Queue size: %d\n", queue_size(queue));
+    
+    queue_destroy(queue);
 
     return 0;
 }

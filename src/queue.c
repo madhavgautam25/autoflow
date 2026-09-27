@@ -54,7 +54,8 @@ int queue_enqueue(ProcessQueue *queue, Process *process) {
 
     queue->items[queue -> rear] = process;
 
-    queue->rear++;
+    queue->rear = (queue->rear + 1) % queue->capacity;
+
     queue->size++;
 
     return 1;
@@ -68,7 +69,8 @@ Process *queue_dequeue(ProcessQueue *queue) {
 
     Process *process = queue->items[queue->front];
 
-    queue->front++;
+    queue->front = (queue->front + 1) % queue->capacity;
+
     queue->size--;
 
     return process;

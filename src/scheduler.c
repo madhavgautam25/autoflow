@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "scheduler.h"
 #include "metrics.h"
+#include "queue.h"
 
 Scheduler *scheduler_create(int capacity) {
 
@@ -233,4 +234,126 @@ void scheduler_run_priority(Scheduler *scheduler) {
 
         completed_count++;
     }
+}
+
+
+void scheduler_run_round_robin(
+    Scheduler *scheduler,
+    int time_quantum
+) {
+
+    if (scheduler == NULL || time_quantum <= 0) {
+        return;
+    }
+
+    ProcessQueue *queue =
+        queue_create(scheduler->process_count);
+
+    if (queue == NULL) {
+        return;
+    }
+
+    scheduler->current_time = 0;
+
+    int completed_count = 0;
+
+    for (int i = 0; i < scheduler->process_count; i++) {
+
+        scheduler->processes[i].remaining_time =
+            scheduler->processes[i].burst_time;
+
+        scheduler->processes[i].start_time = -1;
+        scheduler->processes[i].completion_time = -1;
+    }
+
+    int added[scheduler->process_count];
+
+    for (int i = 0; i < scheduler->process_count; i++) {
+        added[i] = 0;
+    }
+
+    while (completed_count < scheduler->process_count) {
+
+        for (int i = 0; i < scheduler->process_count; i++) {
+
+            Process *process =
+                &scheduler->processes[i];
+
+            if (added[i] == 0 &&
+                process->arrival_time <=
+                    scheduler->current_time) {
+
+                queue_enqueue(queue, process);
+
+                added[i] = 1;
+            }
+        }
+
+        if (queue_is_empty(queue)) {
+
+            scheduler->current_time++;
+
+            continue;
+        }
+
+        Process *process =
+            queue_dequeue(queue);
+
+        if (process == NULL) {
+            continue;
+        }
+
+        if (process->start_time == -1) {
+
+            process->start_time =
+                scheduler->current_time;
+        }
+
+        int execution_time =
+            time_quantum;
+
+        if (process->remaining_time <
+            execution_time) {
+
+            execution_time =
+                process->remaining_time;
+        }
+
+        scheduler->current_time +=
+            execution_time;
+
+        process->remaining_time -=
+            execution_time;
+
+        for (int i = 0; i < scheduler->process_count; i++) {
+
+            Process *new_process =
+                &scheduler->processes[i];
+
+            if (added[i] == 0 &&
+                new_process->arrival_time <=
+                    scheduler->current_time) {
+
+                queue_enqueue(queue, new_process);
+
+                added[i] = 1;
+            }
+        }
+
+        if (process->remaining_time > 0) {
+
+            queue_enqueue(queue, process);
+
+        } else {
+
+            process->completion_time =
+                scheduler->current_time;
+
+            calculate_process_metrics(process);
+
+            completed_count++;
+        }
+    }
+
+    queue_destroy(queue);
 }
