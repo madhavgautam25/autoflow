@@ -27,4 +27,6 @@ void scheduler_run_fcfs(Scheduler *scheduler);
 
 void scheduler_run_sjf(Scheduler *scheduler);
 
+void scheduler_run_priority(Scheduler *scheduler);
+
 #endif
