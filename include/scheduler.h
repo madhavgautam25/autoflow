@@ -34,4 +34,6 @@ void scheduler_run_round_robin(
     int time_quantum
 );
 
+void scheduler_run_adaptive(Scheduler *scheduler);
+
 #endif

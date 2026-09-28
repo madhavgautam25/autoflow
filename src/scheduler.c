@@ -3,6 +3,7 @@
 #include "scheduler.h"
 #include "metrics.h"
 #include "queue.h"
+#include "workload.h"
 
 Scheduler *scheduler_create(int capacity) {
 
@@ -356,4 +357,19 @@ void scheduler_run_round_robin(
     }
 
     queue_destroy(queue);
+}
+
+
+void scheduler_run_adaptive(Scheduler *scheduler) {
+
+    if (scheduler == NULL) {
+        return;
+    }
+
+    int quantum = workload_adaptive_quantum(
+        scheduler->processes,
+        scheduler->process_count
+    );
+
+    scheduler_run_round_robin(scheduler, quantum);
 }
