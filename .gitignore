@@ -1,2 +1,5 @@
 .vscode
 *.exe
+*.o
+library_test
+libautoflow.a
