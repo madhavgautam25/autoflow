@@ -2,6 +2,8 @@ CC = gcc
 
 CFLAGS = -Wall -Wextra -Iinclude
 
+LIB = libautoflow.a
+
 SRC = \
 	src/process.c \
 	src/queue.c \
@@ -16,12 +18,10 @@ OBJ = \
 	workload.o \
 	scheduler.o
 
-TARGET = libautoflow.a
+all: $(LIB)
 
-all: $(TARGET)
-
-$(TARGET): $(OBJ)
-	ar rcs $(TARGET) $(OBJ)
+$(LIB): $(OBJ)
+	ar rcs $(LIB) $(OBJ)
 
 process.o:
 	$(CC) $(CFLAGS) -c src/process.c
@@ -39,4 +39,6 @@ scheduler.o:
 	$(CC) $(CFLAGS) -c src/scheduler.c
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(OBJ) $(LIB)
+
+.PHONY: all clean

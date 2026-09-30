@@ -1,5 +1,23 @@
-.vscode
-*.exe
+# Object files
 *.o
-library_test
-libautoflow.a
+*.obj
+
+# Static libraries
+*.a
+
+# Executables
+*.exe
+*.out
+
+# Build directories
+build/
+bin/
+
+# IDE files
+.vscode/
+.vs/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

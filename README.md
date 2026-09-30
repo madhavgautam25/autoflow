@@ -4,43 +4,89 @@ A workload-aware adaptive CPU scheduling library written in C.
 
 ## Overview
 
-AutoFlow is a reusable C library for simulating and evaluating CPU scheduling strategies.
+AutoFlow is a lightweight C library for simulating and experimenting with CPU scheduling algorithms.
 
-The library analyzes process workload characteristics and dynamically determines scheduling behavior instead of relying on a single fixed scheduling policy.
+It provides commonly used scheduling algorithms along with a workload-aware mechanism that automatically determines a suitable Round Robin time quantum based on the workload.
 
-## Objectives
+AutoFlow is designed for learning, experimentation, algorithm comparison, and understanding the internal implementation of CPU scheduling.
 
-- Provide a reusable CPU scheduling library in C
-- Implement standard scheduling algorithms as baselines
-- Analyze workload characteristics
-- Develop a custom adaptive scheduling mechanism
-- Calculate scheduling performance metrics
-- Provide a clean and simple API
-- Package the project as a reusable static library
+> AutoFlow is a CPU scheduling simulation library. It is not a real operating-system kernel scheduler.
 
-## Planned Features
+---
+
+## Features
 
 - Process management
-- Ready queue management
+- Ready queue implementation using a circular queue
 - FCFS scheduling
-- SJF scheduling
+- Shortest Job First scheduling
 - Priority scheduling
 - Round Robin scheduling
 - Workload analysis
-- Adaptive scheduling
-- Scheduling metrics
-- Gantt chart generation
-- Static library support
+- Adaptive Round Robin time quantum
+- Waiting time calculation
+- Turnaround time calculation
+- Response time calculation
+- Reusable static library
+- Simple public API
 
-## Project Structure
+---
+
+## Scheduling Algorithms
+
+### FCFS
+
+First Come First Serve executes processes according to their arrival/order in the scheduler.
+
+### SJF
+
+Shortest Job First selects the available process with the smallest burst time.
+
+AutoFlow currently implements non-preemptive SJF.
+
+### Priority Scheduling
+
+Priority scheduling selects the available process with the highest priority.
+
+In AutoFlow, a lower numerical priority value represents a higher priority.
+
+### Round Robin
+
+Round Robin gives each process a fixed time quantum and places unfinished processes back into the ready queue.
+
+AutoFlow uses a circular queue for efficient ready-queue management.
+
+### Adaptive Scheduling
+
+AutoFlow can automatically calculate a time quantum based on the workload.
+
+The current rule is:
+
+Adaptive Quantum = Average Burst Time / 2
+
+The calculated quantum is constrained to a minimum of 1 and a maximum of 10.
+
+This provides a simple and explainable workload-aware scheduling mechanism.
+
+---
+
+## Architecture
 
 ```text
-AutoFlow/
-├── include/       # Public header files
-├── src/           # Library implementation
-├── examples/      # Example programs
-├── tests/         # Test cases
-├── Makefile       # Build automation
-├── README.md      # Project documentation
-├── LICENSE        # Project license
-└── .gitignore     # Ignored files
+                    AutoFlow
+                       |
+              +--------+--------+
+              |                 |
+          Process Model      Scheduler
+                                |
+              +-----------------+----------------+
+              |          |          |             |
+             FCFS       SJF      Priority     Round Robin
+                                                   |
+                                             Circular Queue
+                                                   |
+                                           Workload Analysis
+                                                   |
+                                           Adaptive Quantum
+                                                   |
+                                         Scheduling Metrics
