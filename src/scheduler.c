@@ -50,6 +50,7 @@ int scheduler_add_process(
     process->burst_time = burst_time;
     process->remaining_time = burst_time;
     process->priority = priority;
+    process->effective_priority = priority;
 
     process->start_time = -1;
     process->completion_time = -1;
@@ -194,6 +195,11 @@ void scheduler_run_priority(Scheduler *scheduler) {
 
     int completed_count = 0;
 
+    for (int i = 0; i < scheduler->process_count; i++) {
+        scheduler->processes[i].effective_priority =
+            scheduler->processes[i].priority;
+    }
+
     while (completed_count < scheduler->process_count) {
 
         int highest_index = -1;
@@ -205,9 +211,15 @@ void scheduler_run_priority(Scheduler *scheduler) {
             if (completed[i] == 0 &&
                 process->arrival_time <= scheduler->current_time) {
 
+                int waiting_time =
+                    scheduler->current_time - process->arrival_time;
+
+                process->effective_priority =
+                    process->priority - waiting_time / 10;
+
                 if (highest_index == -1 ||
-                    process->priority <
-                    scheduler->processes[highest_index].priority) {
+                    process->effective_priority <
+                    scheduler->processes[highest_index].effective_priority) {
 
                     highest_index = i;
                 }
@@ -238,12 +250,14 @@ void scheduler_run_priority(Scheduler *scheduler) {
 }
 
 
-void scheduler_run_round_robin(
+static void scheduler_run_round_robin_internal(
     Scheduler *scheduler,
-    int time_quantum
+    int time_quantum,
+    int adaptive
 ) {
 
-    if (scheduler == NULL || time_quantum <= 0) {
+    if (scheduler == NULL ||
+        (adaptive == 0 && time_quantum <= 0)) {
         return;
     }
 
@@ -265,6 +279,13 @@ void scheduler_run_round_robin(
 
         scheduler->processes[i].start_time = -1;
         scheduler->processes[i].completion_time = -1;
+    }
+
+    if (adaptive != 0) {
+        time_quantum = workload_adaptive_quantum(
+            scheduler->processes,
+            scheduler->process_count
+        );
     }
 
     int added[scheduler->process_count];
@@ -354,22 +375,26 @@ void scheduler_run_round_robin(
 
             completed_count++;
         }
+
+        if (adaptive != 0 && completed_count < scheduler->process_count) {
+            time_quantum = workload_adaptive_quantum_remaining(
+                scheduler->processes,
+                scheduler->process_count
+            );
+        }
     }
 
     queue_destroy(queue);
 }
 
+void scheduler_run_round_robin(
+    Scheduler *scheduler,
+    int time_quantum
+) {
+    scheduler_run_round_robin_internal(scheduler, time_quantum, 0);
+}
 
 void scheduler_run_adaptive(Scheduler *scheduler) {
 
-    if (scheduler == NULL) {
-        return;
-    }
-
-    int quantum = workload_adaptive_quantum(
-        scheduler->processes,
-        scheduler->process_count
-    );
-
-    scheduler_run_round_robin(scheduler, quantum);
+    scheduler_run_round_robin_internal(scheduler, 0, 1);
 }

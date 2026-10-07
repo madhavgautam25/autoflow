@@ -7,6 +7,7 @@ typedef struct {
     int burst_time;
     int remaining_time;
     int priority;
+    int effective_priority;
 
     int start_time;
     int completion_time;

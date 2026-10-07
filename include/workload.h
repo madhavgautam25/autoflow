@@ -12,4 +12,9 @@ int workload_adaptive_quantum(
     int process_count
 );
 
+int workload_adaptive_quantum_remaining(
+    Process *processes,
+    int process_count
+);
+
 #endif

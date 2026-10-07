@@ -1,33 +1,19 @@
 #include <stdio.h>
 
-#include "scheduler.h"
-#include "workload.h"
+#include "autoflow.h"
 
 int main() {
 
     Scheduler *scheduler =
-        scheduler_create(4);
+        scheduler_create(2);
 
     if (scheduler == NULL) {
         printf("Failed to create scheduler.\n");
         return 1;
     }
 
-    scheduler_add_process(
-        scheduler, 1, 0, 8, 2
-    );
-
-    scheduler_add_process(
-        scheduler, 2, 1, 3, 1
-    );
-
-    scheduler_add_process(
-        scheduler, 3, 2, 12, 3
-    );
-
-    scheduler_add_process(
-        scheduler, 4, 3, 2, 2
-    );
+    scheduler_add_process(scheduler, 1, 0, 20, 2);
+    scheduler_add_process(scheduler, 2, 0, 4, 1);
 
     int quantum =
         workload_adaptive_quantum(
@@ -37,7 +23,24 @@ int main() {
 
     printf("\nAutoFlow Adaptive Scheduling\n");
     printf("--------------------------------\n");
-    printf("Adaptive Time Quantum: %d\n", quantum);
+    printf("Initial adaptive time quantum: %d\n", quantum);
+
+    scheduler->processes[0].remaining_time -= quantum;
+
+    int next_quantum =
+        workload_adaptive_quantum_remaining(
+            scheduler->processes,
+            scheduler->process_count
+        );
+
+    printf(
+        "After PID 1 uses one %d-unit slice, the next quantum is: %d\n",
+        quantum,
+        next_quantum
+    );
+
+    scheduler->processes[0].remaining_time =
+        scheduler->processes[0].burst_time;
 
     scheduler_run_adaptive(scheduler);
 

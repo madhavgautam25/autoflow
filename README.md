@@ -21,6 +21,7 @@ AutoFlow is designed for learning, experimentation, algorithm comparison, and un
 - FCFS scheduling
 - Shortest Job First scheduling
 - Priority scheduling
+- Priority aging for starvation protection
 - Round Robin scheduling
 - Workload analysis
 - Adaptive Round Robin time quantum
@@ -49,6 +50,9 @@ AutoFlow currently implements non-preemptive SJF.
 Priority scheduling selects the available process with the highest priority.
 
 In AutoFlow, a lower numerical priority value represents a higher priority.
+To reduce starvation, a waiting process improves its effective priority by 1
+for every 10 units of waiting time. The original priority value is unchanged;
+only the effective priority is used to choose the next process.
 
 ### Round Robin
 
@@ -60,11 +64,13 @@ AutoFlow uses a circular queue for efficient ready-queue management.
 
 AutoFlow can automatically calculate a time quantum based on the workload.
 
-The current rule is:
+The initial rule is:
 
 Adaptive Quantum = Average Burst Time / 2
 
 The calculated quantum is constrained to a minimum of 1 and a maximum of 10.
+During adaptive Round Robin, AutoFlow recalculates the quantum after each
+process turn using the average remaining burst time of unfinished processes.
 
 This provides a simple and explainable workload-aware scheduling mechanism.
 
